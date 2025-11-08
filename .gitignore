@@ -1,0 +1,241 @@
+# Luber Development Workspace .gitignore
+# Root-level ignore patterns for both luber_consumer and luber_app_b2b
+
+# ============================================================================
+# Node.js / JavaScript / TypeScript
+# ============================================================================
+
+# Dependencies
+node_modules/
+.pnp/
+.pnp.*
+.yarn/
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Package manager lock files (optional - uncomment to ignore)
+# package-lock.json
+# pnpm-lock.yaml
+# yarn.lock
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Testing
+coverage/
+*.lcov
+.nyc_output
+
+# Build outputs
+dist/
+build/
+out/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# ============================================================================
+# Next.js
+# ============================================================================
+
+.next/
+.vercel
+.swc/
+
+# ============================================================================
+# Flutter / Dart
+# ============================================================================
+
+# Flutter build artifacts
+**/flutter_*/build/
+**/flutter_*/.dart_tool/
+**/flutter_*/.flutter-plugins
+**/flutter_*/.flutter-plugins-dependencies
+**/flutter_*/.packages
+**/flutter_*/.pub-cache/
+**/flutter_*/.pub/
+
+# iOS
+**/flutter_*/ios/Pods/
+**/flutter_*/ios/.symlinks/
+**/flutter_*/ios/Flutter/App.framework
+**/flutter_*/ios/Flutter/Flutter.framework
+**/flutter_*/ios/Flutter/Flutter.podspec
+**/flutter_*/ios/ServiceDefinitions.json
+**/flutter_*/ios/Runner/GeneratedPluginRegistrant.*
+
+# Android
+**/flutter_*/android/.gradle/
+**/flutter_*/android/captures/
+**/flutter_*/android/gradle/
+**/flutter_*/android/gradlew
+**/flutter_*/android/gradlew.bat
+**/flutter_*/android/local.properties
+**/flutter_*/android/**/GeneratedPluginRegistrant.java
+**/flutter_*/android/key.properties
+**/flutter_*/android/app/debug
+**/flutter_*/android/app/profile
+**/flutter_*/android/app/release
+
+# Dart/Flutter generated files
+**/*.g.dart
+**/*.freezed.dart
+**/*.mocks.dart
+*.dart.js
+*.info.json
+*.js_
+*.js.deps
+*.js.map
+
+# Flutter coverage
+**/flutter_*/coverage/
+
+# ============================================================================
+# Environment & Configuration
+# ============================================================================
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+.env.*.local
+
+# Secrets and credentials
+*.pem
+*.key
+*.cert
+*.p12
+*.keystore
+secrets.json
+credentials.json
+
+# Flutter config (often contains API keys)
+**/flutter_*/lib/config/constants.dart
+
+# ============================================================================
+# Database
+# ============================================================================
+
+# Local database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Database dumps
+*.sql.gz
+*.dump
+
+# ============================================================================
+# IDE & Editors
+# ============================================================================
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# JetBrains IDEs (WebStorm, IntelliJ, etc.)
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Vim
+*.swp
+*.swo
+*~
+.*.sw[a-p]
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# ============================================================================
+# Operating System
+# ============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+.directory
+.Trash-*
+
+# ============================================================================
+# Logs & Temporary Files
+# ============================================================================
+
+*.log
+logs/
+*.tmp
+*.temp
+tmp/
+temp/
+
+# ============================================================================
+# Stripe
+# ============================================================================
+
+# Stripe CLI
+.stripe/
+
+# ============================================================================
+# Documentation (optional)
+# ============================================================================
+
+# Uncomment to ignore generated documentation
+# docs/api/
+# doc/api/
+
+# ============================================================================
+# Miscellaneous
+# ============================================================================
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Compressed files (usually not source)
+*.zip
+*.tar.gz
+*.rar
+
+# Cache directories
+.cache/
+.parcel-cache/
+.turbo/
+
+# Claude Code working directory (if applicable)
+.claude/
