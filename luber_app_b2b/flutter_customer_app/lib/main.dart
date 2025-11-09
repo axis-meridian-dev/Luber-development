@@ -17,15 +17,18 @@ import 'screens/booking/shop_services_screen.dart';
 import 'providers/auth_provider.dart';
 import 'providers/booking_provider.dart';
 import 'providers/shop_provider.dart';
+import 'providers/vehicle_provider.dart';
+import 'config/supabase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
+  SupabaseOptions.ensureConfigured();
   await Supabase.initialize(
-    url: const String.fromEnvironment('SUPABASE_URL'),
-    anonKey: const String.fromEnvironment('SUPABASE_ANON_KEY'),
+    url: SupabaseOptions.url,
+    anonKey: SupabaseOptions.anonKey,
   );
-  
+
   runApp(const LuberCustomerApp());
 }
 
@@ -39,6 +42,7 @@ class LuberCustomerApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => BookingProvider()),
         ChangeNotifierProvider(create: (_) => ShopProvider()),
+        ChangeNotifierProvider(create: (_) => VehicleProvider()),
       ],
       child: MaterialApp.router(
         title: 'Luber Customer',
@@ -87,7 +91,13 @@ final _router = GoRouter(
     ),
     GoRoute(
       path: '/new-booking',
-      builder: (context, state) => const NewBookingScreen(),
+      builder: (context, state) {
+        final extras = state.extra as Map<String, dynamic>?;
+        return NewBookingScreen(
+          selectedShop: extras?['shop'] as Map<String, dynamic>?,
+          selectedPackage: extras?['package'] as Map<String, dynamic>?,
+        );
+      },
     ),
     GoRoute(
       path: '/booking/:id',

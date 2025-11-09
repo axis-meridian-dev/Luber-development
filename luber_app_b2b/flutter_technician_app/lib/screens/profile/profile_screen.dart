@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/job_provider.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -9,7 +10,12 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
+    final jobProvider = context.watch<JobProvider>();
     final user = authProvider.user;
+    final technician = jobProvider.shopTechnician;
+    final shop = jobProvider.shop;
+    final totalJobs = technician?['total_jobs'] ?? 0;
+    final rating = (technician?['rating'] as num?)?.toStringAsFixed(1) ?? '5.0';
 
     return Scaffold(
       appBar: AppBar(
@@ -35,6 +41,14 @@ class ProfileScreen extends StatelessWidget {
             style: Theme.of(context).textTheme.titleLarge,
             textAlign: TextAlign.center,
           ),
+          if (shop != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              shop['shop_name'] as String,
+              style: TextStyle(color: Colors.grey[600]),
+              textAlign: TextAlign.center,
+            ),
+          ],
           const SizedBox(height: 8),
           Chip(
             label: const Text('Technician'),
@@ -52,11 +66,8 @@ class ProfileScreen extends StatelessWidget {
                       Column(
                         children: [
                           Text(
-                            '0',
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineMedium
-                                ?.copyWith(
+                            '$totalJobs',
+                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: Theme.of(context).colorScheme.primary,
                                 ),
@@ -70,11 +81,8 @@ class ProfileScreen extends StatelessWidget {
                       Column(
                         children: [
                           Text(
-                            '0.0',
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineMedium
-                                ?.copyWith(
+                            rating,
+                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: Theme.of(context).colorScheme.primary,
                                 ),
@@ -92,6 +100,13 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
+          SwitchListTile(
+            value: jobProvider.isAvailable,
+            onChanged: (_) => jobProvider.toggleAvailability(),
+            title: const Text('Availability'),
+            subtitle: Text(jobProvider.isAvailable ? 'You are available for new jobs' : 'You are offline'),
+          ),
+          const SizedBox(height: 12),
           ListTile(
             leading: const Icon(Icons.account_balance_wallet),
             title: const Text('Earnings'),

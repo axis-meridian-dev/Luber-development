@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../providers/address_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/payment_method_provider.dart';
+import '../address/addresses_screen.dart';
+import '../payment_methods/payment_methods_screen.dart';
+import '../vehicle/vehicles_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -62,7 +67,11 @@ class ProfileScreen extends StatelessWidget {
                         title: const Text('My Vehicles'),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
-                          // Navigate to vehicles
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const VehiclesScreen(),
+                            ),
+                          );
                         },
                       ),
                       const Divider(height: 1),
@@ -71,7 +80,11 @@ class ProfileScreen extends StatelessWidget {
                         title: const Text('Saved Addresses'),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
-                          // Navigate to addresses
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const AddressesScreen(),
+                            ),
+                          );
                         },
                       ),
                       const Divider(height: 1),
@@ -80,7 +93,11 @@ class ProfileScreen extends StatelessWidget {
                         title: const Text('Payment Methods'),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
-                          // Navigate to payment methods
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const PaymentMethodsScreen(),
+                            ),
+                          );
                         },
                       ),
                     ],
@@ -133,6 +150,8 @@ class ProfileScreen extends StatelessWidget {
 
                     if (confirmed == true && context.mounted) {
                       await context.read<AuthProvider>().signOut();
+                      context.read<AddressProvider>().clear();
+                      context.read<PaymentMethodProvider>().clear();
                       if (context.mounted) {
                         Navigator.of(context).pushReplacementNamed('/login');
                       }

@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../services/location_service.dart';
 
 class ShopProvider with ChangeNotifier {
   final SupabaseClient _supabase = Supabase.instance.client;
-  
+  final LocationService _locationService = LocationService();
+
   List<Map<String, dynamic>> _shops = [];
   Map<String, dynamic>? _selectedShop;
   List<Map<String, dynamic>> _shopPackages = [];
@@ -28,11 +30,51 @@ class ShopProvider with ChangeNotifier {
           .eq('is_active', true)
           .eq('subscription_status', 'active');
 
-      _shops = List<Map<String, dynamic>>.from(response as List);
-      
-      // TODO: Filter by distance using latitude/longitude
-      // For now, showing all active shops
-      
+      List<Map<String, dynamic>> allShops = List<Map<String, dynamic>>.from(response as List);
+
+      // Calculate distance for each shop and filter by radius
+      List<Map<String, dynamic>> nearbyShops = [];
+
+      for (var shop in allShops) {
+        // Assuming shops table has latitude/longitude fields
+        // If not, you may need to geocode the business_address
+        final shopLat = shop['business_latitude'] as double?;
+        final shopLon = shop['business_longitude'] as double?;
+
+        if (shopLat != null && shopLon != null) {
+          final distance = _locationService.calculateDistance(
+            latitude,
+            longitude,
+            shopLat,
+            shopLon,
+          );
+
+          // Only include shops within the specified radius
+          if (distance <= radiusMiles) {
+            shop['distance'] = distance;
+            nearbyShops.add(shop);
+          }
+        } else {
+          // If shop doesn't have coordinates, include it but mark distance as unknown
+          shop['distance'] = null;
+          nearbyShops.add(shop);
+        }
+      }
+
+      // Sort by distance (nearest first), null distances at the end
+      nearbyShops.sort((a, b) {
+        final distA = a['distance'] as double?;
+        final distB = b['distance'] as double?;
+
+        if (distA == null && distB == null) return 0;
+        if (distA == null) return 1;
+        if (distB == null) return -1;
+
+        return distA.compareTo(distB);
+      });
+
+      _shops = nearbyShops;
+
     } catch (e) {
       _error = e.toString();
     } finally {

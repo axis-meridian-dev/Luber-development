@@ -13,15 +13,17 @@ import 'screens/profile/profile_screen.dart';
 import 'screens/earnings/earnings_screen.dart';
 import 'providers/auth_provider.dart';
 import 'providers/job_provider.dart';
+import 'config/supabase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
+  SupabaseOptions.ensureConfigured();
   await Supabase.initialize(
-    url: const String.fromEnvironment('SUPABASE_URL'),
-    anonKey: const String.fromEnvironment('SUPABASE_ANON_KEY'),
+    url: SupabaseOptions.url,
+    anonKey: SupabaseOptions.anonKey,
   );
-  
+
   runApp(const LuberTechnicianApp());
 }
 

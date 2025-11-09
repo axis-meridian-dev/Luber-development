@@ -1,10 +1,11 @@
 import { redirect } from "next/navigation"
 import { createServerClient } from "@/lib/supabase/server"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Plus, Package } from "lucide-react"
 import Link from "next/link"
 import ShopNav from "@/components/shop/shop-nav"
+import PackageCard from "@/components/shop/package-card"
 
 export default async function PackagesPage() {
   const supabase = await createServerClient()
@@ -50,53 +51,7 @@ export default async function PackagesPage() {
         {packages && packages.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {packages.map((pkg) => (
-              <Card key={pkg.id}>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <span>{pkg.package_name}</span>
-                    <span
-                      className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                        pkg.is_active
-                          ? "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                          : "bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400"
-                      }`}
-                    >
-                      {pkg.is_active ? "Active" : "Inactive"}
-                    </span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div>
-                      <div className="text-3xl font-bold text-primary">${pkg.price}</div>
-                      <p className="text-sm text-muted-foreground">{pkg.estimated_duration_minutes} minutes</p>
-                    </div>
-                    {pkg.description && <p className="text-sm text-muted-foreground">{pkg.description}</p>}
-                    <div className="space-y-1 text-sm">
-                      {pkg.oil_brand && (
-                        <div>
-                          <span className="text-muted-foreground">Oil Brand:</span>{" "}
-                          <span className="font-medium">{pkg.oil_brand}</span>
-                        </div>
-                      )}
-                      {pkg.oil_type && (
-                        <div>
-                          <span className="text-muted-foreground">Oil Type:</span>{" "}
-                          <span className="font-medium capitalize">{pkg.oil_type}</span>
-                        </div>
-                      )}
-                      <div>
-                        <span className="text-muted-foreground">Includes Filter:</span>{" "}
-                        <span className="font-medium">{pkg.includes_filter ? "Yes" : "No"}</span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Includes Inspection:</span>{" "}
-                        <span className="font-medium">{pkg.includes_inspection ? "Yes" : "No"}</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <PackageCard key={pkg.id} packageData={pkg} />
             ))}
           </div>
         ) : (

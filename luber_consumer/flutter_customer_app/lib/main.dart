@@ -4,8 +4,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'providers/address_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/job_provider.dart';
+import 'providers/payment_method_provider.dart';
+import 'providers/vehicle_provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/home/home_screen.dart';
@@ -35,6 +38,9 @@ class LuberCustomerApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => JobProvider()),
+        ChangeNotifierProvider(create: (_) => AddressProvider()),
+        ChangeNotifierProvider(create: (_) => PaymentMethodProvider()),
+        ChangeNotifierProvider(create: (_) => VehicleProvider()),
       ],
       child: MaterialApp(
         title: 'Luber',

@@ -15,14 +15,16 @@ Flutter mobile application for Luber customers to book on-demand oil changes.
 
 1. Install Flutter SDK (3.0.0 or higher)
 2. Run `flutter pub get` to install dependencies
-3. Configure environment variables:
-   - `SUPABASE_URL`: Your Supabase project URL
-   - `SUPABASE_ANON_KEY`: Your Supabase anonymous key
+3. Configure environment variables (reuse the same values that power the Next.js web app):
+   - `NEXT_PUBLIC_SUPABASE_LUBER_PUBLIC_SUPABASE_URL` (or `SUPABASE_URL`)
+   - `NEXT_PUBLIC_SUPABASE_LUBER_PUBLIC_SUPABASE_ANON_KEY` (or `SUPABASE_ANON_KEY`)
 
 ## Running the App
 
 \`\`\`bash
-flutter run --dart-define=SUPABASE_URL=your_url --dart-define=SUPABASE_ANON_KEY=your_key
+flutter run \
+  --dart-define=NEXT_PUBLIC_SUPABASE_LUBER_PUBLIC_SUPABASE_URL=https://your-project.supabase.co \
+  --dart-define=NEXT_PUBLIC_SUPABASE_LUBER_PUBLIC_SUPABASE_ANON_KEY=public-anon-key
 \`\`\`
 
 ## Build for Production

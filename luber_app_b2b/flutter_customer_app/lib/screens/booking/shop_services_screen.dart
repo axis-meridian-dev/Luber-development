@@ -1,9 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/shop_provider.dart';
 
 class ShopServicesScreen extends StatelessWidget {
   const ShopServicesScreen({Key? key}) : super(key: key);
+
+  Color _colorFromHex(String? hex, Color fallback) {
+    if (hex == null || hex.isEmpty) {
+      return fallback;
+    }
+    final formatted = hex.replaceAll('#', '');
+    if (formatted.length == 6) {
+      return Color(int.parse('FF$formatted', radix: 16));
+    }
+    if (formatted.length == 8) {
+      return Color(int.parse(formatted, radix: 16));
+    }
+    return fallback;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +52,10 @@ class ShopServicesScreen extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Color(int.parse(shop['primary_color'].substring(1), radix: 16) + 0xFF000000),
+                    color: _colorFromHex(
+                      shop['primary_color'] as String?,
+                      Theme.of(context).colorScheme.primary,
+                    ),
                   ),
                   child: Column(
                     children: [
@@ -101,10 +119,10 @@ class ShopServicesScreen extends StatelessWidget {
                               margin: const EdgeInsets.only(bottom: 16),
                               child: InkWell(
                                 onTap: () {
-                                  Navigator.pushNamed(
-                                    context,
+                                  if (!context.mounted) return;
+                                  context.push(
                                     '/new-booking',
-                                    arguments: {
+                                    extra: {
                                       'shop': shop,
                                       'package': package,
                                     },
@@ -132,7 +150,10 @@ class ShopServicesScreen extends StatelessWidget {
                                             style: TextStyle(
                                               fontSize: 24,
                                               fontWeight: FontWeight.bold,
-                                              color: Color(int.parse(shop['primary_color'].substring(1), radix: 16) + 0xFF000000),
+                                              color: _colorFromHex(
+                                                shop['primary_color'] as String?,
+                                                Theme.of(context).colorScheme.primary,
+                                              ),
                                             ),
                                           ),
                                         ],

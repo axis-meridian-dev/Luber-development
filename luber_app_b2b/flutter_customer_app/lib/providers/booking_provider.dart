@@ -2,7 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class BookingProvider with ChangeNotifier {
-  final _supabase = Supabase.instance.client;
+  final SupabaseClient _supabase = Supabase.instance.client;
+
   List<Map<String, dynamic>> _bookings = [];
   bool _isLoading = false;
   String? _error;
@@ -12,24 +13,36 @@ class BookingProvider with ChangeNotifier {
   String? get error => _error;
 
   Future<void> fetchBookings() async {
-    try {
-      _isLoading = true;
-      notifyListeners();
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
 
+    try {
       final user = _supabase.auth.currentUser;
-      if (user == null) return;
+      if (user == null) {
+        _bookings = [];
+        return;
+      }
 
       final response = await _supabase
           .from('bookings')
-          .select('*, vehicles(*), technicians(*, profiles(*))')
+          .select(
+            '''
+            *,
+            vehicle:vehicles(*),
+            shop:shops(*),
+            service_package:shop_service_packages(*),
+            customer:customers(*, profile:profiles(*)),
+            technician:shop_technicians(*, profile:profiles(*))
+            ''',
+          )
           .eq('customer_id', user.id)
           .order('created_at', ascending: false);
 
       _bookings = List<Map<String, dynamic>>.from(response);
-      _isLoading = false;
-      notifyListeners();
     } catch (e) {
       _error = e.toString();
+    } finally {
       _isLoading = false;
       notifyListeners();
     }
@@ -43,14 +56,18 @@ class BookingProvider with ChangeNotifier {
     required String city,
     required String state,
     required String zip,
+    required String shopId,
+    required String servicePackageId,
+    required double price,
     double? latitude,
     double? longitude,
     String? notes,
   }) async {
-    try {
-      _isLoading = true;
-      notifyListeners();
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
 
+    try {
       final user = _supabase.auth.currentUser;
       if (user == null) return false;
 
@@ -67,33 +84,57 @@ class BookingProvider with ChangeNotifier {
         'service_longitude': longitude,
         'notes': notes,
         'status': 'pending',
+        'shop_id': shopId,
+        'service_package_id': servicePackageId,
+        'estimated_price': price,
       });
 
       await fetchBookings();
-      _isLoading = false;
-      notifyListeners();
       return true;
     } catch (e) {
       _error = e.toString();
+      return false;
+    } finally {
       _isLoading = false;
       notifyListeners();
-      return false;
     }
   }
 
   Future<bool> cancelBooking(String bookingId) async {
     try {
-      await _supabase
-          .from('bookings')
-          .update({'status': 'cancelled'})
-          .eq('id', bookingId);
-
+      await _supabase.from('bookings').update({'status': 'cancelled'}).eq('id', bookingId);
       await fetchBookings();
       return true;
     } catch (e) {
       _error = e.toString();
       notifyListeners();
       return false;
+    }
+  }
+
+  Future<Map<String, dynamic>?> fetchBookingDetails(String bookingId) async {
+    try {
+      final response = await _supabase
+          .from('bookings')
+          .select(
+            '''
+            *,
+            vehicle:vehicles(*),
+            shop:shops(*),
+            service_package:shop_service_packages(*),
+            customer:customers(*, profile:profiles(*)),
+            technician:shop_technicians(*, profile:profiles(*))
+            ''',
+          )
+          .eq('id', bookingId)
+          .maybeSingle();
+
+      if (response == null) return null;
+      return Map<String, dynamic>.from(response);
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return null;
     }
   }
 }

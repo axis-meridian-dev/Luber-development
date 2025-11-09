@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class JobProvider with ChangeNotifier {
-  final _supabase = Supabase.instance.client;
+  final SupabaseClient _supabase = Supabase.instance.client;
   List<Map<String, dynamic>> _availableJobs = [];
   List<Map<String, dynamic>> _myJobs = [];
   Map<String, dynamic>? _shopTechnician;
@@ -147,7 +147,6 @@ class JobProvider with ChangeNotifier {
     try {
       if (_shop == null || _shopTechnician == null) return false;
 
-      // Calculate transaction fee based on shop tier
       final transactionFeePercent = _shop!['subscription_tier'] == 'solo' ? 0.08 : 0.05;
       final transactionFee = finalPrice * transactionFeePercent;
       final shopPayout = finalPrice - transactionFee;
@@ -163,13 +162,13 @@ class JobProvider with ChangeNotifier {
           })
           .eq('id', jobId);
 
-      // Update shop technician's total jobs count
+      final updatedJobs = (_shopTechnician!['total_jobs'] ?? 0) + 1;
       await _supabase
           .from('shop_technicians')
-          .update({
-            'total_jobs': (_shopTechnician!['total_jobs'] ?? 0) + 1,
-          })
+          .update({'total_jobs': updatedJobs})
           .eq('id', _shopTechnician!['id']);
+
+      _shopTechnician = Map<String, dynamic>.from(_shopTechnician!)..['total_jobs'] = updatedJobs;
 
       await fetchMyJobs();
       return true;
@@ -194,6 +193,113 @@ class JobProvider with ChangeNotifier {
     } catch (e) {
       _error = e.toString();
       notifyListeners();
+    }
+  }
+
+  Future<Map<String, dynamic>?> fetchJobDetails(String jobId) async {
+    try {
+      final response = await _supabase
+          .from('bookings')
+          .select(
+            '''
+            *,
+            vehicle:vehicles(*),
+            customer:customers(*, profile:profiles(*)),
+            service_package:shop_service_packages(*),
+            shop:shops(*),
+            technician:shop_technicians(*, profile:profiles(*))
+            ''',
+          )
+          .eq('id', jobId)
+          .maybeSingle();
+
+      if (response == null) return null;
+      return Map<String, dynamic>.from(response);
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchEarningsSummary() async {
+    try {
+      if (_shopTechnician == null) {
+        await fetchShopTechnician();
+      }
+
+      if (_shopTechnician == null) {
+        return {
+          'totalEarnings': 0.0,
+          'weekEarnings': 0.0,
+          'pendingEarnings': 0.0,
+          'completedJobs': 0,
+          'activeJobs': 0,
+          'recentPayouts': <Map<String, dynamic>>[],
+        };
+      }
+
+      final response = await _supabase
+          .from('bookings')
+          .select('id,status,final_price,estimated_price,shop_payout,scheduled_date,completed_date')
+          .eq('shop_technician_id', _shopTechnician!['id'])
+          .order('scheduled_date', ascending: false);
+
+      final bookings = List<Map<String, dynamic>>.from(response);
+
+      double totalEarnings = 0;
+      double weekEarnings = 0;
+      double pendingEarnings = 0;
+      int completedJobs = 0;
+      int activeJobs = 0;
+      final recentPayouts = <Map<String, dynamic>>[];
+
+      final now = DateTime.now();
+      final startOfWeek = DateTime(now.year, now.month, now.day).subtract(Duration(days: now.weekday - 1));
+
+      for (final booking in bookings) {
+        final status = booking['status'] as String;
+        final amount = ((booking['shop_payout'] ?? booking['final_price'] ?? booking['estimated_price']) as num?)
+                ?.toDouble() ??
+            0;
+
+        if (status == 'completed') {
+          completedJobs += 1;
+          totalEarnings += amount;
+          final completedDate = booking['completed_date'] != null
+              ? DateTime.parse(booking['completed_date'] as String)
+              : DateTime.parse(booking['scheduled_date'] as String);
+          if (!completedDate.isBefore(startOfWeek)) {
+            weekEarnings += amount;
+          }
+          if (recentPayouts.length < 5) {
+            recentPayouts.add(booking);
+          }
+        } else if (status == 'accepted' || status == 'in_progress') {
+          activeJobs += 1;
+          pendingEarnings += amount;
+        }
+      }
+
+      return {
+        'totalEarnings': totalEarnings,
+        'weekEarnings': weekEarnings,
+        'pendingEarnings': pendingEarnings,
+        'completedJobs': completedJobs,
+        'activeJobs': activeJobs,
+        'recentPayouts': recentPayouts,
+      };
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return {
+        'totalEarnings': 0.0,
+        'weekEarnings': 0.0,
+        'pendingEarnings': 0.0,
+        'completedJobs': 0,
+        'activeJobs': 0,
+        'recentPayouts': <Map<String, dynamic>>[],
+      };
     }
   }
 }
